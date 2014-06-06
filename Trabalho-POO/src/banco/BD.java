@@ -16,21 +16,7 @@ public class BD {
 	String username= "softy";
 	String password ="123456";
 	
-	Connection connection = null;
-	
-	public static void main (String [] args){
-		BD teste = new BD();
-		
-		Produto p = new Produto(3,"produtoeditado", 52, 52, 23, null);
-		
-		try {
-			ResultSet t = teste.gravaProduto(p,true);
-			t.next();
-			System.out.println(t.getInt(1));
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
+	public Connection connection = null;
 	
 	public BD(){
 		try{
@@ -59,11 +45,14 @@ public class BD {
 		);
 		return s.getResultSet();
 	}
-	public ResultSet gravaProduto(Produto p,boolean editar) throws SQLException{
+	
+	//Cadastro e edição de produtos:
+	public int gravaProduto(Produto p, boolean editar) throws SQLException{
 		String controleGrupo = (p.grupo != null? "'"+p.grupo.grupoID+"'":"NULL");
 		
 		Statement s = connection.createStatement();
 		
+		int result;
 		if (editar){
 			s.executeUpdate(
 				"UPDATE tb_produto " +
@@ -72,18 +61,121 @@ public class BD {
 				"WHERE codProduto='"+p.produto_id+"' ",
 				Statement.RETURN_GENERATED_KEYS
 			);
+			result = p.produto_id;
+		}
+		else {
+			String q = "INSERT INTO tb_produto " +
+					"(nome, valor, peso, quantidadeEstocada, codGrupoProduto) "+
+					"VALUES ('"+p.nome+"', '"+p.valor+"', '"+p.peso+"', '"+p.quantidadeEstocada+"', "+controleGrupo+")";
+			System.out.println(q);
+			s.executeUpdate(
+				q,
+				Statement.RETURN_GENERATED_KEYS
+			);
+			ResultSet resultado = s.getGeneratedKeys();
+			resultado.next();
+			result = resultado.getInt(1);
+		}
+		
+		return result;
+	}
+	
+	//Cadastro e edição de Fornecedor:
+	public ResultSet gravaFornecedor(Fornecedor f,boolean editar) throws SQLException{
+		//pessoa_id|razaoSocial|nomeFantasia|cnpj|telefone|status|rua|numero|complemento|bairro|cidade|estado
+		Statement s = connection.createStatement();
+		
+		if (editar){
+			s.executeUpdate(
+				"UPDATE tb_fornecedor " +
+				"SET razaoSocial='"+f.razaoSocialVal+"', nomeFantasia='"+f.nomeFantasiaVal+"', CNPJ='"+f.cnpjVal+"', " +
+				"tel= '"+f.telefoneVal+"', rua= '"+f.endereco.ruaVal+"', num= '"+f.endereco.numeroVal+"', complemento= '"+f.endereco.complementoVal+"'," +
+				"bairro= '"+f.endereco.bairroVal+"', cidade= '"+f.endereco.cidadeVal+"', estado= '"+f.endereco.estadoVal+"', status= '"+f.statusVal+"' "+
+				"WHERE codFornecedor='"+f.pessoa_id+"' ",
+				Statement.RETURN_GENERATED_KEYS
+			);
 		}
 		else {
 			s.executeUpdate(
-				"INSERT INTO tb_produto " +
-				"(nome, valor, peso, quantidadeEstocada, codGrupoProduto) "+
-				"VALUES ('"+p.nome+"', '"+p.valor+"', '"+p.peso+"', '"+p.quantidadeEstocada+"', "+controleGrupo+")",
+				"INSERT INTO tb_fornecedor " +
+				"(razaoSocial, nomeFantasia, cnpj, tel, rua, num, complemento, bairro, cidade, estado, status) "+
+				"VALUES ('"+f.razaoSocialVal+"', '"+f.nomeFantasiaVal+"','"+f.cnpjVal+"', '"+f.telefoneVal+"','"+f.endereco.ruaVal+"', " +
+				"'"+f.endereco.numeroVal+"','"+f.endereco.complementoVal+"', '"+f.endereco.bairroVal+"', '"+f.endereco.cidadeVal+"', '"+f.endereco.estadoVal+"','"+f.statusVal+"')",
+				Statement.RETURN_GENERATED_KEYS
+			);
+		}
+		return s.getGeneratedKeys();
+		
+	}
+	//Cadastro e edição de Clientes:
+//	public ResultSet gravaClienteFis(ClienteFisico f,boolean editar) throws SQLException{
+//		//pessoa_id|nome|rg|cpf|telefone|status|rua|numero|complemento|bairro|cidade|estado
+//		Statement s = connection.createStatement();
+		
+//		if (editar){ //falta editar para clientefisico(é uma copia de cliente Jur)
+//			s.executeUpdate(
+//				"UPDATE tb_clientefisico " +
+//				"SET razaoSocial='"+f.razaoSocialVal+"', nomeFantasia='"+f.nomeFantasiaVal+"', CNPJ='"+f.cnpjVal+"', " +
+//				"tel= '"+f.telefoneVal+"', rua= '"+f.endereco.ruaVal+"', num= '"+f.endereco.numeroVal+"', complemento= '"+f.endereco.complementoVal+"'," +
+//				"bairro= '"+f.endereco.bairroVal+"', cidade= '"+f.endereco.cidadeVal+"', estado= '"+f.endereco.estadoVal+"', "+
+//				"WHERE codFornecedor='"+f.pessoa_id+"' ",
+//				Statement.RETURN_GENERATED_KEYS
+//			);
+//		}
+//		else {
+//			s.executeUpdate(
+//				"INSERT INTO tb_clientefisico " +
+//				"(razaoSocial, nomeFantasia, cnpj, tel, rua, num, complemento, bairro, cidade, estado) "+
+//				"VALUES ('"+f.razaoSocialVal+"', '"+f.nomeFantasiaVal+"','"+f.cnpjVal+"', '"+f.telefoneVal+"','"+f.endereco.ruaVal+"', " +
+//				"'"+f.endereco.numeroVal+"','"+f.endereco.complementoVal+"', '"+f.endereco.bairroVal+"', '"+f.endereco.cidadeVal+"', '"+f.endereco.estadoVal+"')",
+//				Statement.RETURN_GENERATED_KEYS
+//			);
+//		}
+//		return s.getGeneratedKeys();
+//	
+	//}
+	public ResultSet gravaClienteJur(ClienteJuridico f,boolean editar) throws SQLException{
+		//pessoa_id|razaoSocial|nomeFantasia|cnpj|telefone|status|rua|numero|complemento|bairro|cidade|estado
+		Statement s = connection.createStatement();
+		
+		if (editar){
+			s.executeUpdate(
+				"UPDATE tb_clientejuridico " +
+				"SET razaoSocial='"+f.razaoSocialVal+"', nomeFantasia='"+f.nomeFantasiaVal+"', CNPJ='"+f.cnpjVal+"', " +
+				"tel= '"+f.telefoneVal+"', rua= '"+f.endereco.ruaVal+"', num= '"+f.endereco.numeroVal+"', complemento= '"+f.endereco.complementoVal+"'," +
+				"bairro= '"+f.endereco.bairroVal+"', cidade= '"+f.endereco.cidadeVal+"', estado= '"+f.endereco.estadoVal+"', status= '"+f.statusVal+"',"+
+				"WHERE codFornecedor='"+f.pessoa_id+"' ",
+				Statement.RETURN_GENERATED_KEYS
+			);
+		}
+		else {
+			s.executeUpdate(
+				"INSERT INTO tb_clientejuridico " +
+				"(razaoSocial, nomeFantasia, cnpj, tel, rua, num, complemento, bairro, cidade, estado, status) "+
+				"VALUES ('"+f.razaoSocialVal+"', '"+f.nomeFantasiaVal+"','"+f.cnpjVal+"', '"+f.telefoneVal+"','"+f.endereco.ruaVal+"', " +
+				"'"+f.endereco.numeroVal+"','"+f.endereco.complementoVal+"', '"+f.endereco.bairroVal+"', '"+f.endereco.cidadeVal+"', '"+f.endereco.estadoVal+"', '"+f.statusVal+"')",
 				Statement.RETURN_GENERATED_KEYS
 			);
 		}
 		return s.getGeneratedKeys();
 	}
 	
+	//Cadastro e edição de Funcionarios:
+	public void gravaFuncionario(Funcionario f,boolean editar){
+		//pessoa_id|nome|rg|cpf|telefone|status|rua|numero|complemento|bairro|cidade|estado|cargo|horarioEntrada|
+		//horarioPausa|horarioRetorno|horarioSaida|salario
+		
+	}
+	//Cadastro e edição de Empresa:
+	public void gravaEmpresa(MinhaEmpresa f,boolean editar){
+		//pessoa_id|razaoSocial|nomeFantasia|cnpj|telefone|status|rua|numero|complemento|bairro|cidade|estado|saldo
+		
+	}
+	
+	
+	
+	
+	//emitir nota fiscal de Saida:
 	public ResultSet gravaNotaSaida(NotaFiscal n, int tipoCliente) throws SQLException{
 		Statement s = connection.createStatement();
 		
@@ -123,134 +215,25 @@ public class BD {
 	}
 	
 	
-	//nota fiscal cliente fisico
-	public void gravaNotaFiscalClienteFis(NFSaidaFisico nf, boolean editar){
-		//nota_id|data|clienteFisico_id
-		String registro = nf.nota_id+"|"+nf.data+"|"+nf.cliente.pessoa_id;
-		if (editar){
-			this.editaArquivo("NotaSaidaFisico", registro);
-		}
-		else
-			this.gravaArquivo("NotaSaidaFisico", registro);
+	
+	
+	//nota fiscal Entrada (criar a funçao de gravar a nota fiscal de entrada para 0-fis 1-jur
+	public ResultSet gravaNotaEntrada(NotaFiscal n, int tipoCliente) throws SQLException{
+		Statement s = connection.createStatement();
+		return s.getGeneratedKeys();
 		
-		this.gravaNotaFiscalClienteFisProduto(nf.nota_id,nf.produtos, editar);
-	}
-	public void gravaNotaFiscalClienteFisProduto(int nota_id, Produto p, boolean editar){
-		//nota_id|produto_id|quantidade|precoUnitario
-		String registro = nota_id+"|"+p.produto_id+"|"+p.quantidadeNaNota+"|"+p.valor;
-		if (editar){
-			this.editaArquivo("NotaSaidaFisicoProduto", registro);
-		}
-		else
-			this.gravaArquivo("NotaSaidaFisicoProduto", registro);
 	}
 	
-	//nota fiscal cliente juridico
-	public void gravaNotaFiscalClienteJur(NFSaidaJuridico nf, boolean editar){
-		//nota_id|data|clientejuridico_id
-		String registro = nf.nota_id+"|"+nf.data+"|"+nf.cliente.pessoa_id;
-		if (editar){
-			this.editaArquivo("NotaSaidaJuridico", registro);
-		}
-		else
-			this.gravaArquivo("NotaSaidaJuridico", registro);
-		
-		this.gravaNotaFiscalClienteJurProduto(nf.nota_id,nf.produtos,editar);
-	}
-	public void gravaNotaFiscalClienteJurProduto(int nota_id, Produto p,boolean editar){
-		//nota_id|produto_id|quantidade|precoUnitario
-		String registro = nota_id+"|"+p.produto_id+"|"+p.quantidadeNaNota+"|"+p.valor;
-		if (editar){
-			this.editaArquivo("NotaSaidaJuridicoProduto", registro);
-		}
-		else
-			this.gravaArquivo("NotaSaidaJuridicoProduto", registro);
-	}
 	
-	//nota fiscal fornecedor juridico
-	public void gravaNotaFiscalFornecedorJur(NFEntrada nf,boolean editar){
-		//nota_id|data|fornecedorjuridico_id
-		String registro = nf.nota_id+"|"+nf.data+"|"+nf.fornecedor.pessoa_id;
-		if (editar){
-			this.editaArquivo("NotaEntradaJuridico", registro);
-		}
-		else
-			this.gravaArquivo("NotaEntradaJuridico", registro);
-		
-		this.gravaNotaFiscalFornecedorJurProduto(nf.nota_id,nf.produtos,editar);
-	}
-	public void gravaNotaFiscalFornecedorJurProduto(int nota_id, Produto p,boolean editar){
-		//nota_id|produto_id|quantidade|precoUnitario
-		String registro = nota_id+"|"+p.produto_id+"|"+p.quantidadeNaNota+"|"+p.valor;
-		if (editar){
-			this.editaArquivo("NotaEntradaJuridicoProduto", registro);
-		}
-		else
-			this.gravaArquivo("NotaEntradaJuridicoProduto", registro);
-	}
 	
-	public void gravaFornecedorJur(Fornecedor f,boolean editar){
-		//pessoa_id|razaoSocial|nomeFantasia|cnpj|telefone|status|rua|numero|complemento|bairro|cidade|estado
-		String registro = f.pessoa_id+"|"+f.razaoSocialVal+"|"+f.nomeFantasiaVal+"|"+f.cnpjVal+"|"+f.telefoneVal+"|"+f.statusVal+"|"+
-		f.endereco.ruaVal+"|"+f.endereco.numeroVal+"|"+f.endereco.complementoVal+"|"+f.endereco.bairroVal+"|"+
-		f.endereco.cidadeVal+"|"+f.endereco.estadoVal;
-		
-		if (editar){
-			this.editaArquivo("FornecedorJuridico", registro);
-		}
-		else
-			this.gravaArquivo("FornecedorJuridico", registro);
-	}
-	public void gravaClienteFis(ClienteFisico f,boolean editar){
-		//pessoa_id|nome|rg|cpf|telefone|status|rua|numero|complemento|bairro|cidade|estado
-		String registro = f.pessoa_id+"|"+f.nome+"|"+f.rg+"|"+f.cpf+"|"+f.telefone+"|"+f.status+"|"+
-		f.endereco.ruaVal+"|"+f.endereco.numeroVal+"|"+f.endereco.complementoVal+"|"+f.endereco.bairroVal+"|"+
-		f.endereco.cidadeVal+"|"+f.endereco.estadoVal;
-		
-		if (editar){
-			this.editaArquivo("ClienteFisico", registro);
-		}
-		else
-			this.gravaArquivo("ClienteFisico", registro);
-	}
-	public void gravaClienteJur(ClienteJuridico f,boolean editar){
-		//pessoa_id|razaoSocial|nomeFantasia|cnpj|telefone|status|rua|numero|complemento|bairro|cidade|estado
-		String registro = f.pessoa_id+"|"+f.razaoSocialVal+"|"+f.nomeFantasiaVal+"|"+f.cnpjVal+"|"+f.telefoneVal+"|"+f.statusVal+"|"+
-		f.endereco.ruaVal+"|"+f.endereco.numeroVal+"|"+f.endereco.complementoVal+"|"+f.endereco.bairroVal+"|"+
-		f.endereco.cidadeVal+"|"+f.endereco.estadoVal;
-		
-		if (editar){
-			this.editaArquivo("ClienteJuridico", registro);
-		}
-		else
-			this.gravaArquivo("ClienteJuridico", registro);
-	}
-	public void gravaEmpresa(MinhaEmpresa f,boolean editar){
-		//pessoa_id|razaoSocial|nomeFantasia|cnpj|telefone|status|rua|numero|complemento|bairro|cidade|estado|saldo
-		String registro = f.pessoa_id+"|"+f.razaoSocialVal+"|"+f.nomeFantasiaVal+"|"+f.cnpjVal+"|"+f.telefoneVal+"|"+f.statusVal+"|"+
-		f.endereco.ruaVal+"|"+f.endereco.numeroVal+"|"+f.endereco.complementoVal+"|"+f.endereco.bairroVal+"|"+
-		f.endereco.cidadeVal+"|"+f.endereco.estadoVal+"|"+f.saldo;
-		
-		if (editar){
-			this.editaArquivo("MinhaEmpresa", registro);
-		}
-		else
-			this.gravaArquivo("MinhaEmpresa", registro);
-	}
-	public void gravaFuncionario(Funcionario f,boolean editar){
-		//pessoa_id|nome|rg|cpf|telefone|status|rua|numero|complemento|bairro|cidade|estado|cargo|horarioEntrada|
-		//horarioPausa|horarioRetorno|horarioSaida|salario
-		String registro = f.pessoa_id+"|"+f.nome+"|"+f.rg+"|"+f.cpf+"|"+f.telefone+"|"+f.status+"|"+
-		f.endereco.ruaVal+"|"+f.endereco.numeroVal+"|"+f.endereco.complementoVal+"|"+f.endereco.bairroVal+"|"+
-		f.endereco.cidadeVal+"|"+f.endereco.estadoVal+"|"+f.cargo+"|"+f.horarioEntrada+"|"+
-		f.horarioPausa+"|"+f.horarioRetorno+"|"+f.horarioSaida+"|"+f.salario;
-		
-		if (editar){
-			this.editaArquivo("Funcionario", registro);
-		}
-		else
-			this.gravaArquivo("Funcionario", registro);
-	}
+	
+	
+	
+	
+	
+	
+	
+	
 	public boolean gravaArquivo(String arquivo, String dado){
 		try{
 			FileWriter arq = new FileWriter(arquivo+".txt",true);

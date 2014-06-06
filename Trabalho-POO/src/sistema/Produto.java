@@ -1,4 +1,4 @@
- package sistema;
+package sistema;
 import banco.BD;
 import grafico.Desktop;
 
