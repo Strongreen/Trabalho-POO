@@ -9,6 +9,11 @@ import java.io.*;
 import java.util.ArrayList;
 import sistema.*;
 
+
+//nota- adicionar: public boolean is_cliente;
+//public boolean is_fornecedor; na funçao PessoaJuridica
+
+
 public class BD {
 	String serverName ="localhost";
 	String mydatabase = "softy";
@@ -41,7 +46,8 @@ public class BD {
 	public ResultSet getProdutos() throws SQLException{
 		Statement s = connection.createStatement();
 		s.executeQuery(
-			"SELECT * FROM tb_produto"
+			"SELECT * FROM tb_produto p, tb_grupoproduto g " +
+			"WHERE p.codGrupoProduto = g.codGrupoProduto"
 		);
 		return s.getResultSet();
 	}
@@ -80,9 +86,16 @@ public class BD {
 		return result;
 	}
 	
-	//Cadastro e edição de Fornecedor:
-	public ResultSet gravaFornecedor(Fornecedor f,boolean editar) throws SQLException{
-		//pessoa_id|razaoSocial|nomeFantasia|cnpj|telefone|status|rua|numero|complemento|bairro|cidade|estado
+	public ResultSet getFornecedores() throws SQLException{
+		Statement s = connection.createStatement();
+		s.executeQuery(
+			"SELECT * FROM `tb_pessoajuridica` WHERE `is_fornecedor`='1'"
+		);
+		return s.getResultSet();
+	}
+	//Cadastro e edição de Fornecedor/ Cliente Juridico
+	public ResultSet gravaPessoaJuridica(Fornecedor f,boolean editar, int isCliente, int isFornecedor) throws SQLException{
+		
 		Statement s = connection.createStatement();
 		
 		if (editar){
@@ -91,89 +104,112 @@ public class BD {
 				"SET razaoSocial='"+f.razaoSocialVal+"', nomeFantasia='"+f.nomeFantasiaVal+"', CNPJ='"+f.cnpjVal+"', " +
 				"tel= '"+f.telefoneVal+"', rua= '"+f.endereco.ruaVal+"', num= '"+f.endereco.numeroVal+"', complemento= '"+f.endereco.complementoVal+"'," +
 				"bairro= '"+f.endereco.bairroVal+"', cidade= '"+f.endereco.cidadeVal+"', estado= '"+f.endereco.estadoVal+"', status= '"+f.statusVal+"' "+
-				"WHERE codFornecedor='"+f.pessoa_id+"' ",
+				"is_cliente= '"+isCliente+"', is_fornecedor= '"+isFornecedor+"'"+
+				"WHERE codPessoaJuridica='"+f.pessoa_id+"' ",
 				Statement.RETURN_GENERATED_KEYS
 			);
 		}
 		else {
 			s.executeUpdate(
 				"INSERT INTO tb_fornecedor " +
-				"(razaoSocial, nomeFantasia, cnpj, tel, rua, num, complemento, bairro, cidade, estado, status) "+
+				"(razaoSocial, nomeFantasia, cnpj, tel, rua, num, complemento, bairro, cidade, estado, status, is_cliente, is_fornecedor) "+
 				"VALUES ('"+f.razaoSocialVal+"', '"+f.nomeFantasiaVal+"','"+f.cnpjVal+"', '"+f.telefoneVal+"','"+f.endereco.ruaVal+"', " +
-				"'"+f.endereco.numeroVal+"','"+f.endereco.complementoVal+"', '"+f.endereco.bairroVal+"', '"+f.endereco.cidadeVal+"', '"+f.endereco.estadoVal+"','"+f.statusVal+"')",
+				"'"+f.endereco.numeroVal+"','"+f.endereco.complementoVal+"','"+f.endereco.bairroVal+"', '"+f.endereco.cidadeVal+"', " + 
+				"'"+f.endereco.estadoVal+"','"+f.statusVal+"','"+f.is_cliente+"','"+f.is_fornecedor+"')",
 				Statement.RETURN_GENERATED_KEYS
 			);
 		}
 		return s.getGeneratedKeys();
 		
 	}
-	//Cadastro e edição de Clientes:
-//	public ResultSet gravaClienteFis(ClienteFisico f,boolean editar) throws SQLException{
-//		//pessoa_id|nome|rg|cpf|telefone|status|rua|numero|complemento|bairro|cidade|estado
-//		Statement s = connection.createStatement();
+	
+	//Cadastro e edição de Cliente Fisico:
+	public ResultSet gravaClienteFis(ClienteFisico f,boolean editar) throws SQLException{
 		
-//		if (editar){ //falta editar para clientefisico(é uma copia de cliente Jur)
-//			s.executeUpdate(
-//				"UPDATE tb_clientefisico " +
-//				"SET razaoSocial='"+f.razaoSocialVal+"', nomeFantasia='"+f.nomeFantasiaVal+"', CNPJ='"+f.cnpjVal+"', " +
-//				"tel= '"+f.telefoneVal+"', rua= '"+f.endereco.ruaVal+"', num= '"+f.endereco.numeroVal+"', complemento= '"+f.endereco.complementoVal+"'," +
-//				"bairro= '"+f.endereco.bairroVal+"', cidade= '"+f.endereco.cidadeVal+"', estado= '"+f.endereco.estadoVal+"', "+
-//				"WHERE codFornecedor='"+f.pessoa_id+"' ",
-//				Statement.RETURN_GENERATED_KEYS
-//			);
-//		}
-//		else {
-//			s.executeUpdate(
-//				"INSERT INTO tb_clientefisico " +
-//				"(razaoSocial, nomeFantasia, cnpj, tel, rua, num, complemento, bairro, cidade, estado) "+
-//				"VALUES ('"+f.razaoSocialVal+"', '"+f.nomeFantasiaVal+"','"+f.cnpjVal+"', '"+f.telefoneVal+"','"+f.endereco.ruaVal+"', " +
-//				"'"+f.endereco.numeroVal+"','"+f.endereco.complementoVal+"', '"+f.endereco.bairroVal+"', '"+f.endereco.cidadeVal+"', '"+f.endereco.estadoVal+"')",
-//				Statement.RETURN_GENERATED_KEYS
-//			);
-//		}
-//		return s.getGeneratedKeys();
-//	
-	//}
-	public ResultSet gravaClienteJur(ClienteJuridico f,boolean editar) throws SQLException{
-		//pessoa_id|razaoSocial|nomeFantasia|cnpj|telefone|status|rua|numero|complemento|bairro|cidade|estado
 		Statement s = connection.createStatement();
 		
-		if (editar){
+		if (editar){ 
 			s.executeUpdate(
-				"UPDATE tb_clientejuridico " +
-				"SET razaoSocial='"+f.razaoSocialVal+"', nomeFantasia='"+f.nomeFantasiaVal+"', CNPJ='"+f.cnpjVal+"', " +
-				"tel= '"+f.telefoneVal+"', rua= '"+f.endereco.ruaVal+"', num= '"+f.endereco.numeroVal+"', complemento= '"+f.endereco.complementoVal+"'," +
-				"bairro= '"+f.endereco.bairroVal+"', cidade= '"+f.endereco.cidadeVal+"', estado= '"+f.endereco.estadoVal+"', status= '"+f.statusVal+"',"+
-				"WHERE codFornecedor='"+f.pessoa_id+"' ",
+				"UPDATE tb_clientefisico " +
+				"SET nome='"+f.nome+"', CPF='"+f.cpf+"', RG= '"+f.rg+"', tel= '"+f.telefone+"'," +
+				"rua= '"+f.endereco.ruaVal+"', num= '"+f.endereco.numeroVal+"', complemento= '"+f.endereco.complementoVal+"'," +
+				"bairro= '"+f.endereco.bairroVal+"', cidade= '"+f.endereco.cidadeVal+"', estado= '"+f.endereco.estadoVal+"', "+
+				"WHERE codCLienteFisico='"+f.pessoa_id+"' ",
 				Statement.RETURN_GENERATED_KEYS
 			);
 		}
 		else {
 			s.executeUpdate(
-				"INSERT INTO tb_clientejuridico " +
-				"(razaoSocial, nomeFantasia, cnpj, tel, rua, num, complemento, bairro, cidade, estado, status) "+
-				"VALUES ('"+f.razaoSocialVal+"', '"+f.nomeFantasiaVal+"','"+f.cnpjVal+"', '"+f.telefoneVal+"','"+f.endereco.ruaVal+"', " +
-				"'"+f.endereco.numeroVal+"','"+f.endereco.complementoVal+"', '"+f.endereco.bairroVal+"', '"+f.endereco.cidadeVal+"', '"+f.endereco.estadoVal+"', '"+f.statusVal+"')",
+				"INSERT INTO tb_clientefisico " +
+				"(nome, CPF, RG, tel, rua, num, complemento, bairro, cidade, estado) "+
+				"VALUES ('"+f.nome+"', '"+f.cpf+"','"+f.rg+"', '"+f.telefone+"','"+f.endereco.ruaVal+"', " +
+				"'"+f.endereco.numeroVal+"','"+f.endereco.complementoVal+"', '"+f.endereco.bairroVal+"', '"+f.endereco.cidadeVal+"', '"+f.endereco.estadoVal+"')",
+				Statement.RETURN_GENERATED_KEYS
+			);
+		}
+		return s.getGeneratedKeys();
+	
+	}
+	
+	//Cadastro e edição de Funcionarios:
+	public ResultSet gravaFuncionario(Funcionario f,boolean editar) throws SQLException{
+		
+		Statement s = connection.createStatement();
+		
+		if (editar){ 
+			s.executeUpdate(
+				"UPDATE tb_funcionario " +
+				"SET nome='"+f.nome+"', CPF='"+f.cpf+"', RG= '"+f.rg+"', tel= '"+f.telefone+"', rua= '"+f.endereco.ruaVal+"'," +
+				"num= '"+f.endereco.numeroVal+"', complemento= '"+f.endereco.complementoVal+"', bairro= '"+f.endereco.bairroVal+"'," +
+				"cidade= '"+f.endereco.cidadeVal+"', estado= '"+f.endereco.estadoVal+"', cargo= '"+f.cargo+"', "+
+				"horario_entrada= '"+f.horarioEntrada+"', horario_pausa= '"+f.horarioPausa+"', horario_retorno= '"+f.horarioRetorno+"' "+
+				"horario_saida= '"+f.horarioSaida+"', salario= '"+f.salario+"' "+
+				"WHERE codFuncionario='"+f.pessoa_id+"' ",
+				Statement.RETURN_GENERATED_KEYS
+			);
+		}
+		else {
+			s.executeUpdate(
+				"INSERT INTO tb_clientefisico " +
+				"(nome, CPF, RG, tel, rua, num, complemento, bairro, cidade, estado, cargo, horario_entrada, horario_pausa, horario_retorno, horario_saida, salario) "+
+				"VALUES ('"+f.nome+"', '"+f.cpf+"','"+f.rg+"', '"+f.telefone+"','"+f.endereco.ruaVal+"', " +
+				"'"+f.endereco.numeroVal+"','"+f.endereco.complementoVal+"', '"+f.endereco.bairroVal+"', '"+f.endereco.cidadeVal+"', "+ 
+				"'"+f.endereco.estadoVal+"','"+f.cargo+"','"+f.horarioEntrada+"','"+f.horarioPausa+"','"+f.horarioRetorno+"','"+f.horarioSaida+"', '"+f.salario+"' )",
 				Statement.RETURN_GENERATED_KEYS
 			);
 		}
 		return s.getGeneratedKeys();
 	}
 	
-	//Cadastro e edição de Funcionarios:
-	public void gravaFuncionario(Funcionario f,boolean editar){
-		//pessoa_id|nome|rg|cpf|telefone|status|rua|numero|complemento|bairro|cidade|estado|cargo|horarioEntrada|
-		//horarioPausa|horarioRetorno|horarioSaida|salario
+	//cadastro e edição da Empresa
+	public ResultSet gravaEmpresa(MinhaEmpresa f,boolean editar) throws SQLException{
+		
+		Statement s = connection.createStatement();
+		
+		if (editar){
+			s.executeUpdate(
+				"UPDATE tb_minhaempresa " +
+				"SET razaoSocial='"+f.razaoSocialVal+"', nomeFantasia='"+f.nomeFantasiaVal+"', CNPJ='"+f.cnpjVal+"', " +
+				"tel= '"+f.telefoneVal+"', rua= '"+f.endereco.ruaVal+"', num= '"+f.endereco.numeroVal+"', complemento= '"+f.endereco.complementoVal+"'," +
+				"bairro= '"+f.endereco.bairroVal+"', cidade= '"+f.endereco.cidadeVal+"', estado= '"+f.endereco.estadoVal+"', status= '"+f.statusVal+"' "+
+				"saldo= '"+f.saldo+"'"+
+				"WHERE codEmpresa='"+f.pessoa_id+"' ",
+				Statement.RETURN_GENERATED_KEYS
+			);
+		}
+		else {
+			s.executeUpdate(
+				"INSERT INTO tb_fornecedor " +
+				"(razaoSocial, nomeFantasia, cnpj, tel, rua, num, complemento, bairro, cidade, estado, status, is_cliente, is_fornecedor) "+
+				"VALUES ('"+f.razaoSocialVal+"', '"+f.nomeFantasiaVal+"','"+f.cnpjVal+"', '"+f.telefoneVal+"','"+f.endereco.ruaVal+"', " +
+				"'"+f.endereco.numeroVal+"','"+f.endereco.complementoVal+"','"+f.endereco.bairroVal+"', '"+f.endereco.cidadeVal+"', " + 
+				"'"+f.endereco.estadoVal+"','"+f.statusVal+"','"+f.saldo+"')",
+				Statement.RETURN_GENERATED_KEYS
+			);
+		}
+		return s.getGeneratedKeys();
 		
 	}
-	//Cadastro e edição de Empresa:
-	public void gravaEmpresa(MinhaEmpresa f,boolean editar){
-		//pessoa_id|razaoSocial|nomeFantasia|cnpj|telefone|status|rua|numero|complemento|bairro|cidade|estado|saldo
-		
-	}
-	
-	
-	
 	
 	//emitir nota fiscal de Saida:
 	public ResultSet gravaNotaSaida(NotaFiscal n, int tipoCliente) throws SQLException{
@@ -186,8 +222,7 @@ public class BD {
 				"(tipoCliente, data, valorNota, codFuncionario, codClienteFisico, codClienteJuridico) "+
 				"VALUES ("+tipoCliente+", '"+nf.data+"', '"+nf.funcionario.pessoa_id+"', '"+nf.cliente.pessoa_id+"', NULL)",
 				Statement.RETURN_GENERATED_KEYS
-			);
-			
+			);	
 		}
 		else{
 			NFSaidaJuridico nf = (NFSaidaJuridico)n;
@@ -213,15 +248,75 @@ public class BD {
 		
 		return s.getGeneratedKeys();
 	}
-	
-	
-	
-	
+
 	//nota fiscal Entrada (criar a funçao de gravar a nota fiscal de entrada para 0-fis 1-jur
-	public ResultSet gravaNotaEntrada(NotaFiscal n, int tipoCliente) throws SQLException{
+	public ResultSet gravaNotaEntrada(NotaFiscal n) throws SQLException{
 		Statement s = connection.createStatement();
-		return s.getGeneratedKeys();
 		
+	
+		
+		
+		
+		
+		
+		
+		return s.getGeneratedKeys();	
+	}
+
+	public int getGrupoProduto(String nomeGrupo) throws SQLException{
+		Statement s = connection.createStatement();
+		ResultSet id = s.executeQuery(
+				"SELECT codGrupoProduto "+
+				"FROM tb_grupoproduto "+
+				"WHERE nomeGrupo LIKE '"+nomeGrupo+"'");
+		
+		id.next();
+		return id.getInt("codGrupoProduto");
+	}
+	public String getGrupoProduto(int codGrupo) throws SQLException{
+		Statement s = connection.createStatement();
+		ResultSet id = s.executeQuery(
+				"SELECT nomeGrupo "+
+				"FROM tb_grupoproduto "+
+				"WHERE codGrupoProduto = '"+codGrupo+"'");
+		
+		id.next();
+		return id.getString("nomeGrupo");
+	}
+	public ResultSet getGruposProdutos() throws SQLException{
+		Statement s = connection.createStatement();
+		s.executeQuery(
+			"SELECT * FROM tb_grupoproduto"
+		);
+		return s.getResultSet();
+	}
+	
+	public int gravaGrupo(GrupoProduto g, boolean editar) throws SQLException{
+		Statement s = connection.createStatement();
+		
+		int result;
+		if (editar){
+			s.executeUpdate(
+				"UPDATE tb_grupoproduto " +
+				"SET nomeGrupo='"+g.nome+"' " +
+				"WHERE codGrupoProduto='"+g.grupoID+"' ",
+				Statement.RETURN_GENERATED_KEYS
+			);
+			result = g.grupoID;
+		}
+		else {	
+			s.executeUpdate(
+				"INSERT INTO tb_grupoproduto " +
+				"(nomeGrupo) " +
+				"VALUES ('"+g.nome+"')",
+				Statement.RETURN_GENERATED_KEYS
+			);
+			ResultSet resultado = s.getGeneratedKeys();
+			resultado.next();
+			result = resultado.getInt(1);
+		}
+		
+		return result;
 	}
 	
 	
@@ -232,8 +327,7 @@ public class BD {
 	
 	
 	
-	
-	
+	//funções absoletas:
 	public boolean gravaArquivo(String arquivo, String dado){
 		try{
 			FileWriter arq = new FileWriter(arquivo+".txt",true);

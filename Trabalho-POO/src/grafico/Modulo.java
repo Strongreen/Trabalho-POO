@@ -55,7 +55,8 @@ public class Modulo extends JPanel implements MouseListener, WindowListener{
 				break;
 			case "fornecedores":
 				if(window == null){
-					window = new WindowOfModule("Teste",Fornecedor.getPanels(),Fornecedor.getButtons());
+					Fornecedores modForn = new Fornecedores();
+					window = new WindowOfModule("Teste",modForn.getPanels(),modForn.getButtons());
 			 		window.addWindowListener(this);
 				}
 				

@@ -33,46 +33,4 @@ public class Fornecedor extends PessoaJuridica{
 	public Fornecedor(){
 		super();
 	}
-	public static JPanel[] getPanels(){
-		JPanel backListPanel = new JPanel();
-		
-		JPanel frontListPanel = new JPanel();
-		
-		JPanel productList = new JPanel();
-		ArrayList<ArrayList<String>> ps = Desktop.banco.lerArquivo("Fornecedor");
-
-		productList.setLayout(new GridLayout((ps.size()+1),6,10,4));
-		productList.add(new JLabel("Razao Social"));
-		productList.add(new JLabel("Nome Fantasia"));
-		productList.add(new JLabel("CNPJ"));
-		productList.add(new JLabel("Telefone"));
-		productList.add(new JLabel("Rua"));
-		productList.add(new JLabel("Numero"));
-		productList.add(new JLabel("Complemento"));
-		productList.add(new JLabel("Bairro"));
-		productList.add(new JLabel("Cidade"));
-		productList.add(new JLabel("Estado"));
-		productList.add(new JLabel("Status"));
-		for(int x=0; x<ps.size(); x++){
-			for(int y=0;y<6;y++){
-				productList.add(new JLabel(ps.get(x).get(y)));
-			}
-		}
-		backListPanel.add(frontListPanel);
-		frontListPanel.add(productList);
-		
-		
-		JPanel castPanel = new JPanel();
-		
-		JPanel FornecedorCadastro = new Fornecedor();
-		castPanel.add(FornecedorCadastro);
-		JPanel [] p = { backListPanel, castPanel };
-		return p;
-		
-	}
-
-	public static JButton[] getButtons(){
-		JButton [] b = { new JButton("Listagem"), new JButton("Cadastro") };
-		return b;
-	}
 }

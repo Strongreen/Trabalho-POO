@@ -21,7 +21,7 @@ import java.awt.event.ActionListener;
 		setTitle(title);
 		setLocation(50,100);
 		setSize(1000,600);
-		setMinimumSize(new Dimension(800,400));
+		setMinimumSize(new Dimension(950,550));
 		
 		total = new JPanel();
 		total.setLayout(new BorderLayout());

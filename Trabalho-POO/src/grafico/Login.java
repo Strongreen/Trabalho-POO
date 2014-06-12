@@ -1,18 +1,12 @@
 package grafico;
 import javax.swing.*;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Label;
-import java.awt.Toolkit;
 import java.awt.event.*;
 
 public class Login extends JFrame implements ActionListener, KeyListener{
-	JButton login;
-	JButton sair;
+	CJButton login;
+	CJButton sair;
 	JTextField fieldUser;
 	JPasswordField fieldSenha;
 	public Login(){
@@ -42,12 +36,12 @@ public class Login extends JFrame implements ActionListener, KeyListener{
 		fieldSenha.setBounds(75, 45, 100, 25);
 		fieldSenha.addKeyListener(this);
 		
-		login = new JButton("Entrar");
+		login = new CJButton("Entrar");
 		login.setBounds(105, 80, 70, 25);
 		login.addActionListener(this);
 		login.setBackground(new Color(255,255,255));
 
-		sair = new JButton("Sair");
+		sair = new CJButton("Sair");
 		sair.setBounds(25, 80, 70, 25);
 		sair.addActionListener(this);
 		sair.setBackground(new Color(255,255,255));

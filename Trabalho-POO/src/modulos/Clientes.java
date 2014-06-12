@@ -25,7 +25,7 @@ public class Clientes {
 		JPanel panelNome = new JPanel();
 		JPanel panelDocumentos = new JPanel();
 		JPanel panelContatos = new JPanel();
-		JPanel panelEndereco = new Endereco();
+		JPanel panelEndereco = new Enderecos();
 		
 		JPanel form = new JPanel();
 		
